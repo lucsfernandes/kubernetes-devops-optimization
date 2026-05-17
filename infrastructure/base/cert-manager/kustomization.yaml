@@ -9,7 +9,7 @@ generatorOptions:
 labels:
   - includeSelectors: false
     pairs:
-      app.kubernetes.io/part-of: arcobatrox
+      app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
 
 resources:
   - namespace.yaml

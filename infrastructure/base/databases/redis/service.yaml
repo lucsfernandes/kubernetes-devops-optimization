@@ -9,7 +9,7 @@ metadata:
   labels:
     app.kubernetes.io/name: redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: arcobatrox
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
 spec:
   type: ClusterIP
   selector:
