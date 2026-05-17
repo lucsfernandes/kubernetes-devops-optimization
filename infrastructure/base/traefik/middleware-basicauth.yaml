@@ -1,0 +1,110 @@
+# Middlewares globais — vivem no namespace `traefik` e são consumidos por
+# IngressRoutes de OUTROS namespaces graças a allowCrossNamespace=true.
+#
+# Para referenciar de outro namespace:
+#   middlewares:
+#     - name: security-headers
+#       namespace: traefik
+---
+# Força redirecionamento HTTP -> HTTPS.
+# `port: "443"` é OBRIGATÓRIO aqui porque o entrypoint websecure escuta em
+# :8443 dentro do container (Traefik roda como non-root, não pode bindar :443).
+# Sem isso, o Location do 308 sairia como https://host:8443/... — porta
+# interna NÃO exposta externamente, gerando connection refused.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  redirectScheme:
+    scheme: https
+    port: "443"
+    permanent: true
+---
+# Headers de segurança HTTPS — HSTS, anti-clickjacking, MIME sniffing etc.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: security-headers
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  headers:
+    browserXssFilter: true
+    contentTypeNosniff: true
+    forceSTSHeader: true
+    stsIncludeSubdomains: true
+    stsPreload: true
+    stsSeconds: 63072000
+    frameDeny: true
+    referrerPolicy: "strict-origin-when-cross-origin"
+    contentSecurityPolicy: "frame-ancestors 'none'"
+    customResponseHeaders:
+      X-Robots-Tag: "noindex, nofollow, nosnippet, noarchive"
+      Server: ""
+---
+# Rate limit por IP padrão (100 req/s, burst 200).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  rateLimit:
+    average: 100
+    burst: 200
+    period: 1s
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+---
+# Rate limit estrito para endpoints sensíveis (formulários públicos etc.).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit-strict
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  rateLimit:
+    average: 20
+    burst: 40
+    period: 1s
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+---
+# Compressão gzip/brotli.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: compress
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  compress: {}
+---
+# BasicAuth para o dashboard do Traefik.
+# O secret `traefik-dashboard-auth` é criado fora do Git (placeholder na
+# pasta — ver dashboard-secret.yaml). Gere com:
+#   htpasswd -nbB admin 'troque-esta-senha'
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: dashboard-auth
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  basicAuth:
+    secret: traefik-dashboard-auth
+    removeHeader: true
+    realm: "Traefik Dashboard"

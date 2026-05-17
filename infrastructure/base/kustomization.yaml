@@ -1,0 +1,28 @@
+# Kustomization RAIZ da base. Agrega todos os módulos.
+#
+# Aplicação típica: APLICAR POR PARTES (ordem importa porque o cert-manager,
+# por exemplo, precisa estar saudável antes de criar Certificates). Ver
+# INSTALL.md.
+#
+# Aplicar tudo de uma vez funciona depois que cert-manager está rodando
+# (instale-o ANTES via manifest oficial).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+commonAnnotations:
+  app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/managed-by: kustomize
+
+resources:
+  - traefik
+  - cert-manager
+  - databases
+  - n8n
+  - evolution

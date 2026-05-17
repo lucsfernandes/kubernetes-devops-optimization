@@ -1,0 +1,16 @@
+# Agrega o namespace `databases` + Postgres + Redis.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+
+resources:
+  - namespace.yaml
+  - postgres
+  - redis

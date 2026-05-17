@@ -1,0 +1,28 @@
+# Certificate para o dashboard do Traefik.
+# secretName FIXO `traefik-tls` — Traefik consome diretamente.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  secretName: traefik-tls
+  duration: 2160h    # 90d (Let's Encrypt)
+  renewBefore: 360h  # renova 15 dias antes
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - server auth
+    - digital signature
+    - key encipherment
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: traefik.example.com.br
+  dnsNames:
+    - traefik.example.com.br

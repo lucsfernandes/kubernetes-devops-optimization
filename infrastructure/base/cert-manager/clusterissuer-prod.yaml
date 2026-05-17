@@ -1,0 +1,40 @@
+# ClusterIssuer de PRODUÇÃO — Let's Encrypt com HTTP-01 challenge via Traefik.
+#
+# Fluxo:
+#   1. Um Certificate referencia este Issuer.
+#   2. cert-manager cria uma Order + Challenge.
+#   3. Para HTTP-01, cert-manager cria um Ingress temporário com a
+#      IngressClass `traefik`.
+#   4. Traefik roteia /.well-known/acme-challenge/... para o solver.
+#   5. Let's Encrypt valida e emite o certificado.
+#   6. cert-manager grava o Secret TLS com o NOME FIXO especificado em
+#      `spec.secretName` do Certificate.
+#
+# Altere `spec.acme.email` para um e-mail seu (Let's Encrypt manda avisos
+# de expiração).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: <YOUR-EMAIL>
+    privateKeySecretRef:
+      # Chave de conta ACME. cert-manager a cria automaticamente neste Secret.
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          ingress:
+            # Usa a IngressClass `traefik` que definimos no módulo traefik.
+            # cert-manager criará um Ingress padrão referenciando esta classe;
+            # Traefik o resolve normalmente.
+            ingressClassName: traefik
+            # Recursos mínimos para o pod do solver (ele só serve um arquivo).
+            podTemplate:
+              spec:
+                priorityClassName: ""
+                nodeSelector:
+                  kubernetes.io/os: linux

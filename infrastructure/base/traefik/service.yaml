@@ -1,0 +1,54 @@
+# Service do Traefik.
+#
+# Em k3s, o ServiceLB nativo (klipper-lb) materializa LoadBalancers em
+# hostPorts do nó — então o IP público da VPS responde direto em 80/443.
+# Em clusters cloud, troque por type LoadBalancer e o IP virá do provider.
+#
+# externalTrafficPolicy: Local preserva o IP do cliente nos logs do Traefik
+# (importante para rate-limit por IP e para auditoria).
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik
+    app.kubernetes.io/component: ingress-controller
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+      protocol: TCP
+    - name: websecure
+      port: 443
+      targetPort: websecure
+      protocol: TCP
+---
+# Service interno para métricas (scrape do Prometheus).
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-metrics
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: metrics
+      protocol: TCP

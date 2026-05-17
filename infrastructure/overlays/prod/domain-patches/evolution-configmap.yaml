@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evolution-config
+  namespace: evolution
+data:
+  SERVER_URL: "https://evolution.example.com"

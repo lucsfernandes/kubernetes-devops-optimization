@@ -1,0 +1,53 @@
+# Script de inicialização do Postgres.
+#
+# A imagem oficial executa todos os arquivos *.sh / *.sql em
+# /docker-entrypoint-initdb.d na PRIMEIRA criação do data dir.
+# Em reinicializações subsequentes este script é IGNORADO — então é seguro
+# manter idempotência via CREATE DATABASE IF NOT EXISTS (não existe em
+# Postgres, usamos DO $$ ... $$).
+#
+# Cria 4 databases e 4 roles (uma por app), reduz superuso de privilégios:
+#   - n8n_user        -> n8n
+#   - evolution_user  -> evolution
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: databases
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+data:
+  10-create-databases.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    echo "[init] Criando databases e roles de aplicação..."
+
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+      -- ===== n8n =====
+      DO \$\$
+      BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='n8n_user') THEN
+          CREATE ROLE n8n_user LOGIN PASSWORD '${APP_N8N_PASSWORD}';
+        END IF;
+      END
+      \$\$;
+      SELECT 'CREATE DATABASE n8n OWNER n8n_user'
+      WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname='n8n')\\gexec
+      GRANT ALL PRIVILEGES ON DATABASE n8n TO n8n_user;
+
+      -- ===== evolution =====
+      DO \$\$
+      BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='evolution_user') THEN
+          CREATE ROLE evolution_user LOGIN PASSWORD '${APP_EVOLUTION_PASSWORD}';
+        END IF;
+      END
+      \$\$;
+      SELECT 'CREATE DATABASE evolution OWNER evolution_user'
+      WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname='evolution')\\gexec
+      GRANT ALL PRIVILEGES ON DATABASE evolution TO evolution_user;
+    EOSQL
+
+    echo "[init] OK."

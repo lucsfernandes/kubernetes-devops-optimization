@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: receive-forms-api-config
+  namespace: receive-forms
+data:
+  CORS_ORIGIN: "https://forms.example.com,https://api.forms.example.com"

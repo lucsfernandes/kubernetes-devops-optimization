@@ -1,0 +1,24 @@
+# PersistentVolumeClaim do Postgres.
+#
+# Em k3s a StorageClass padrão é `local-path` (provisioner local-path-provisioner)
+# que cria diretórios em /var/lib/rancher/k3s/storage no nó. Para VPS single-node
+# isso é suficiente. Em multi-node troque por Longhorn / EBS / Ceph.
+#
+# 20Gi cobre n8n + evolution + apps por bastante tempo. Aumente via patch no
+# overlay se necessário.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: databases
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: local-path

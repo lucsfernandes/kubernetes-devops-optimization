@@ -1,0 +1,101 @@
+# Configuração da Evolution API v2.3.7.
+# Documentação oficial: https://doc.evolution-api.com/
+# .env.example de referência: https://github.com/EvolutionAPI/evolution-api/blob/v2.3.7/.env.example
+#
+# Mudanças em v2.3.x em relação a v2.2.x usadas aqui:
+#   - REDIS_ENABLED (novo flag top-level; CACHE_REDIS_ENABLED mantido p/ compat).
+#   - CACHE_REDIS_TTL (novo, em segundos).
+#   - Persistência: STORE_* (deprecated) -> DATABASE_SAVE_DATA_*.
+#   - S3_ENABLE -> S3_ENABLED.
+#   - SERVER_NAME adicionado.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evolution-config
+  namespace: evolution
+  labels:
+    app.kubernetes.io/name: evolution
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+data:
+  # ----- Server -----
+  SERVER_NAME: "evolution"
+  SERVER_TYPE: "http"
+  SERVER_PORT: "8080"
+  SERVER_URL: "https://evolution.example.com.br"
+
+  # ----- CORS -----
+  CORS_ORIGIN: "*"
+  CORS_METHODS: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+  CORS_CREDENTIALS: "true"
+
+  # ----- Logs -----
+  LOG_LEVEL: "ERROR,WARN,INFO"
+  LOG_COLOR: "true"
+  LOG_BAILEYS: "error"
+
+  # ----- Database (Postgres) -----
+  DATABASE_PROVIDER: "postgresql"
+  DATABASE_CONNECTION_CLIENT_NAME: "evolution"
+  # A URL completa (com credenciais) está no Secret evolution-secrets:
+  #   DATABASE_CONNECTION_URI
+  #
+  # Persistência de dados em DB (v2.3.x — substitui STORE_*):
+  DATABASE_SAVE_DATA_INSTANCE: "true"
+  DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+  DATABASE_SAVE_MESSAGE_UPDATE: "true"
+  DATABASE_SAVE_DATA_CONTACTS: "true"
+  DATABASE_SAVE_DATA_CHATS: "true"
+  DATABASE_SAVE_DATA_LABELS: "true"
+  DATABASE_SAVE_DATA_HISTORIC: "true"
+  DATABASE_DELETE_MESSAGE: "true"
+
+  # ----- Cache (Redis) -----
+  # REDIS_ENABLED é o flag top-level introduzido em v2.3 que substitui
+  # CACHE_REDIS_ENABLED. Mantemos o antigo também por compatibilidade.
+  REDIS_ENABLED: "true"
+  CACHE_REDIS_ENABLED: "true"
+  CACHE_REDIS_PREFIX_KEY: "evolution"
+  CACHE_REDIS_TTL: "604800"
+  CACHE_REDIS_SAVE_INSTANCES: "true"
+  CACHE_LOCAL_ENABLED: "false"
+
+  # ----- Instâncias -----
+  # DEL_INSTANCE: false (não deleta) ou número (segundos pra deletar instância
+  # desconectada). Em prod usamos false pra evitar perda acidental.
+  DEL_INSTANCE: "false"
+  CONFIG_SESSION_PHONE_CLIENT: "evolution-client"
+  CONFIG_SESSION_PHONE_NAME: "Chrome"
+  CONFIG_SESSION_PHONE_VERSION: "2.3000.1027369691"
+
+  # ----- Webhooks globais -----
+  # Desabilitados — cada instância configura seu próprio webhook via API.
+  WEBHOOK_GLOBAL_ENABLED: "false"
+  WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: "false"
+
+  # ----- Event brokers opcionais (desligados nessa stack) -----
+  RABBITMQ_ENABLED: "false"
+  SQS_ENABLED: "false"
+  WEBSOCKET_ENABLED: "false"
+  PUSHER_ENABLED: "false"
+
+  # ----- Telemetria -----
+  TELEMETRY: "false"
+  TELEMETRY_URL: ""
+
+  # ----- QRCode -----
+  QRCODE_LIMIT: "30"
+  QRCODE_COLOR: "#175197"
+
+  # ----- Storage de mídia (S3/MinIO desligado nessa stack) -----
+  S3_ENABLED: "false"
+
+  # ----- Integrações externas (desligadas por padrão; ligue via API/secret
+  # quando precisar) -----
+  CHATWOOT_ENABLED: "false"
+  TYPEBOT_ENABLED: "false"
+  OPENAI_ENABLED: "false"
+  DIFY_ENABLED: "false"
+
+  # ----- Locale -----
+  LANGUAGE: "pt-BR"
+  TZ: "America/Sao_Paulo"

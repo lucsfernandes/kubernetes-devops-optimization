@@ -1,0 +1,31 @@
+# Middlewares específicos do n8n (locais ao namespace).
+# WebSockets + uploads grandes precisam timeouts maiores.
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: n8n-headers
+  namespace: n8n
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+    customResponseHeaders:
+      X-Robots-Tag: "noindex, nofollow"
+---
+# Buffering para uploads grandes (até 50MB).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: n8n-buffering
+  namespace: n8n
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  buffering:
+    maxRequestBodyBytes: 52428800       # 50 MB
+    memRequestBodyBytes: 2097152        # 2 MB
+    maxResponseBodyBytes: 52428800
+    memResponseBodyBytes: 2097152

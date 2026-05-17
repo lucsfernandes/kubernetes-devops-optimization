@@ -1,0 +1,17 @@
+# Kustomization do módulo cert-manager.
+# Aplique APENAS depois que o cert-manager (Deployment+CRDs) estiver no ar.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: arcobatrox
+
+resources:
+  - namespace.yaml
+  - clusterissuer-prod.yaml
+  - clusterissuer-staging.yaml

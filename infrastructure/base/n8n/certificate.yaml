@@ -1,0 +1,47 @@
+# Um Certificate por host. Secrets TLS com NOMES FIXOS.
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: n8n-main
+  namespace: n8n
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  secretName: n8n-tls
+  duration: 2160h
+  renewBefore: 360h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: n8n.example.com.br
+  dnsNames:
+    - n8n.example.com.br
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: n8n-webhook
+  namespace: n8n
+  labels:
+    app.kubernetes.io/part-of: example
+spec:
+  secretName: n8n-webhook-tls
+  duration: 2160h
+  renewBefore: 360h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: webhook.n8n.example.com.br
+  dnsNames:
+    - webhook.n8n.example.com.br

@@ -1,0 +1,4 @@
+- op: replace
+  path: /spec/headers/accessControlAllowOriginList
+  value:
+    - "https://forms.example.com"

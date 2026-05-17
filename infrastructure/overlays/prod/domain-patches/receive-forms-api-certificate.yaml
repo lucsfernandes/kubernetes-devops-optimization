@@ -1,0 +1,7 @@
+- op: replace
+  path: /spec/commonName
+  value: api.forms.example.com
+- op: replace
+  path: /spec/dnsNames
+  value:
+    - api.forms.example.com

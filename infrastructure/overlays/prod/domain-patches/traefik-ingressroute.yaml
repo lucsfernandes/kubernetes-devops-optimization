@@ -1,0 +1,5 @@
+# Substitui o Host() do dashboard do Traefik para o domínio real.
+# Trocar `traefik.example.com` pelo seu domínio.
+- op: replace
+  path: /spec/routes/0/match
+  value: Host(`traefik.example.com`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))

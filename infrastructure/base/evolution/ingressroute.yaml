@@ -1,0 +1,26 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: evolution
+  namespace: evolution
+  labels:
+    app.kubernetes.io/name: evolution
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`evolution.example.com.br`)
+      kind: Rule
+      services:
+        - name: evolution
+          port: 8080
+      middlewares:
+        - name: security-headers
+          namespace: traefik
+        - name: compress
+          namespace: traefik
+        - name: rate-limit
+          namespace: traefik
+  tls:
+    secretName: evolution-tls

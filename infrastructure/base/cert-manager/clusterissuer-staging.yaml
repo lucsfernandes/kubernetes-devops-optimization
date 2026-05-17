@@ -1,0 +1,28 @@
+# ClusterIssuer de STAGING — usa o ambiente staging da Let's Encrypt.
+#
+# Use este Issuer durante testes para evitar atingir rate limits do
+# Let's Encrypt de produção (5 certificados duplicados/semana, 50 por
+# domínio registrado/semana etc.).
+#
+# Certificados emitidos por este Issuer NÃO são confiáveis pelos browsers
+# (CA "Fake LE Intermediate X1").
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: <YOUR-EMAIL>
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+            podTemplate:
+              spec:
+                nodeSelector:
+                  kubernetes.io/os: linux

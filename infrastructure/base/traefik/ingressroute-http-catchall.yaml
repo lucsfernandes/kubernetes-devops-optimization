@@ -1,0 +1,41 @@
+# IngressRoute catch-all no entrypoint `web` (HTTP :80).
+#
+# Por que existe:
+#   Substitui o redirect global que estava no entrypoint do Traefik. O redirect
+#   global intercepta ANTES do roteamento e quebra o solver HTTP-01 do
+#   cert-manager (que precisa servir /.well-known/acme-challenge/<token> via
+#   HTTP puro). Aqui, o redirect vira um router normal e convive com o Ingress
+#   que o cert-manager cria.
+#
+# Por que NÃO quebra o ACME:
+#   O cert-manager cria um Ingress (não IngressRoute) com path EXATO
+#   /.well-known/acme-challenge/<token>. Traefik calcula prioridade por
+#   especificidade da regra; um path-exact ganha do HostRegexp catch-all.
+#   Reforçamos com `priority: 1` (mais baixo possível) para garantir.
+#
+# Por que aponta para api@internal:
+#   O middlware `redirect-to-https` termina o request com 308 antes de chegar
+#   no service. api@internal é serviço built-in do Traefik que sempre existe;
+#   é apenas um destino sintático válido.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: http-catchall
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/component: http-redirect
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: HostRegexp(`^.+$`)
+      kind: Rule
+      priority: 1
+      services:
+        - name: api@internal
+          kind: TraefikService
+      middlewares:
+        - name: redirect-to-https
+          namespace: traefik

@@ -1,0 +1,16 @@
+# Namespace `databases` — concentra Postgres e Redis compartilhados.
+#
+# Estratégia: UM CLUSTER POSTGRES e UM REDIS, com databases lógicos
+# separados por aplicação (n8n, evolution, arcobatrip, forms). Isso
+# economiza memória/CPU em VPS pequena (2vCPU/8GB).
+#
+# Para crescer: trocar pelo CloudNativePG, Crunchy, ou DBaaS gerenciado.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: databases
+  labels:
+    app.kubernetes.io/name: databases
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+    app.kubernetes.io/managed-by: kustomize
+    pod-security.kubernetes.io/enforce: baseline

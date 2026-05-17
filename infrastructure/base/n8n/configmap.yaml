@@ -1,0 +1,56 @@
+# Configuração não-sensível do n8n.
+# Modo `queue` (Bull) distribui execuções entre workers via Redis.
+# - Pod `n8n-main` roda a UI/API e enfileira jobs.
+# - Pod `n8n-webhook` recebe webhooks externos e os enfileira.
+# - (Workers reais podem ser adicionados depois; em VPS pequena começamos
+#    sem worker dedicado — o main processa em background quando o
+#    EXECUTIONS_MODE é `queue` e não há worker, n8n também roda execuções
+#    no próprio main. Para escalar, criar `deployment-worker.yaml`.)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-config
+  namespace: n8n
+  labels:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+data:
+  # ----- URLs -----
+  N8N_HOST: "n8n.example.com.br"
+  N8N_PORT: "5678"
+  N8N_PROTOCOL: "https"
+  N8N_EDITOR_BASE_URL: "https://n8n.example.com.br"
+  WEBHOOK_URL: "https://webhook.n8n.example.com.br"
+  N8N_PATH: "/"
+
+  # ----- Modo queue (Redis) -----
+  EXECUTIONS_MODE: "queue"
+  QUEUE_BULL_REDIS_HOST: "redis.databases.svc.cluster.local"
+  QUEUE_BULL_REDIS_PORT: "6379"
+  QUEUE_HEALTH_CHECK_ACTIVE: "true"
+
+  # ----- Postgres -----
+  DB_TYPE: "postgresdb"
+  DB_POSTGRESDB_HOST: "postgres-rw.databases.svc.cluster.local"
+  DB_POSTGRESDB_PORT: "5432"
+  DB_POSTGRESDB_DATABASE: "n8n"
+  DB_POSTGRESDB_USER: "n8n_user"
+  DB_POSTGRESDB_SCHEMA: "public"
+
+  # ----- Comportamento -----
+  GENERIC_TIMEZONE: "America/Sao_Paulo"
+  TZ: "America/Sao_Paulo"
+  N8N_LOG_LEVEL: "info"
+  N8N_LOG_OUTPUT: "console"
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+  N8N_HIRING_BANNER_ENABLED: "false"
+  N8N_PERSONALIZATION_ENABLED: "false"
+  N8N_METRICS: "true"
+  EXECUTIONS_DATA_PRUNE: "true"
+  EXECUTIONS_DATA_MAX_AGE: "168"      # 7 dias em horas
+  EXECUTIONS_DATA_PRUNE_MAX_COUNT: "10000"
+
+  # Proxy-aware (estamos atrás do Traefik)
+  N8N_PROXY_HOPS: "1"
+  N8N_TRUSTED_PROXIES: "0.0.0.0/0"

@@ -1,0 +1,20 @@
+# Em prod (VPS single-node) mantemos 1 réplica do Traefik.
+# Recursos um pouco mais generosos para suportar pico de tráfego.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: traefik
+          resources:
+            requests:
+              cpu: 75m
+              memory: 128Mi
+            limits:
+              cpu: 700m
+              memory: 320Mi

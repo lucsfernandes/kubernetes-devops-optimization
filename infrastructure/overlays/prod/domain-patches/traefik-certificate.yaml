@@ -1,0 +1,7 @@
+- op: replace
+  path: /spec/commonName
+  value: traefik.example.com
+- op: replace
+  path: /spec/dnsNames
+  value:
+    - traefik.example.com

@@ -1,0 +1,24 @@
+# Kustomization do módulo Traefik.
+# CRDs do Traefik NÃO entram aqui — instale-os uma vez fora do Kustomize
+# (ver INSTALL.md, etapa "Instalação do Traefik").
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - deployment.yaml
+  - service.yaml
+  - middleware-basicauth.yaml
+  - dashboard-secret.yaml
+  - certificate.yaml
+  - ingressroute-dashboard.yaml
+  - ingressroute-http-catchall.yaml

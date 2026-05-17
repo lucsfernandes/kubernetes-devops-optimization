@@ -1,0 +1,10 @@
+# Strategic merge patch — sobrescreve só as chaves listadas.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-config
+  namespace: n8n
+data:
+  N8N_HOST: "n8n.example.com"
+  N8N_EDITOR_BASE_URL: "https://n8n.example.com"
+  WEBHOOK_URL: "https://webhook.n8n.example.com/"

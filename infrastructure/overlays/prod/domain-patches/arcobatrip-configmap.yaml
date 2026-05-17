@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arcobatrip-config
+  namespace: arcobatrip
+data:
+  CORS_ORIGIN: "https://arcobatrip.example.com,https://api.arcobatrip.example.com"

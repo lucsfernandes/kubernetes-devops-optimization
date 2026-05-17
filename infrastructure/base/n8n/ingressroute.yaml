@@ -1,0 +1,68 @@
+# IngressRoute do n8n — duas rotas:
+#   - n8n.example.com.br           -> n8n-main:5678 (UI/API)
+#   - webhook.n8n.example.com.br   -> n8n-webhook:5678
+#
+# Traefik aplica security-headers e compress (globais, namespace `traefik`)
+# + middlewares locais.
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: n8n-main
+  namespace: n8n
+  labels:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/component: main
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`n8n.example.com.br`)
+      kind: Rule
+      services:
+        - name: n8n-main
+          port: 5678
+      middlewares:
+        - name: security-headers
+          namespace: traefik
+        - name: compress
+          namespace: traefik
+        - name: n8n-headers
+          namespace: n8n
+        - name: n8n-buffering
+          namespace: n8n
+  tls:
+    secretName: n8n-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: n8n-webhook
+  namespace: n8n
+  labels:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/component: webhook
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`webhook.n8n.example.com.br`)
+      kind: Rule
+      services:
+        - name: n8n-webhook
+          port: 5678
+      middlewares:
+        - name: security-headers
+          namespace: traefik
+        - name: compress
+          namespace: traefik
+        - name: rate-limit
+          namespace: traefik
+        - name: n8n-headers
+          namespace: n8n
+        - name: n8n-buffering
+          namespace: n8n
+  tls:
+    secretName: n8n-webhook-tls

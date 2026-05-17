@@ -1,0 +1,18 @@
+# PVC do Redis — persistência AOF/RDB.
+# 5Gi é mais que suficiente para n8n queue + cache do Evolution.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: databases
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path

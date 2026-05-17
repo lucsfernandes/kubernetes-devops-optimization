@@ -1,0 +1,13 @@
+# Namespace dedicado ao Traefik (Ingress Controller).
+# Labels seguem o padrão Pod Security Standards.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+    app.kubernetes.io/managed-by: kustomize
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

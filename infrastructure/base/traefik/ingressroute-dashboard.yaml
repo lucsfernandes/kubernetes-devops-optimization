@@ -1,0 +1,30 @@
+# IngressRoute do dashboard do Traefik.
+# Padrão obrigatório do projeto:
+#   - match com (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+#   - service api@internal kind TraefikService
+#   - BasicAuth obrigatório (middleware `dashboard-auth`)
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+  labels:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/component: dashboard
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.example.com.br`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+      middlewares:
+        - name: dashboard-auth
+          namespace: traefik
+        - name: security-headers
+          namespace: traefik
+  tls:
+    secretName: traefik-tls

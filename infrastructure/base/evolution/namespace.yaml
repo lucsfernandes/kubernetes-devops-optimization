@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: evolution
+  labels:
+    app.kubernetes.io/name: evolution
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+    app.kubernetes.io/managed-by: kustomize
+    pod-security.kubernetes.io/enforce: baseline

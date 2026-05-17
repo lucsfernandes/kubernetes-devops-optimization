@@ -1,0 +1,17 @@
+# PVC do n8n para /home/node/.n8n (binárias, custom nodes, etc.).
+# Não armazena dados de workflows (esses ficam no Postgres).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data
+  namespace: n8n
+  labels:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path

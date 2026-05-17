@@ -1,0 +1,176 @@
+# Overlay PROD — aplica patches em cima da base.
+#
+# O que muda em prod vs base:
+#   - Domínios reais via patches (domain-patches/).
+#   - Ajustes finos de recursos para a VPS 2vCPU/8GB (resource-patches/).
+#
+# IMPORTANTE — substituir example.com:
+#   1. Edite os arquivos em domain-patches/ para o seu domínio.
+#   2. Aplique: kubectl apply -k infrastructure/overlays/prod
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ../../base
+
+# ----------------------------------------------------------------------
+# Patches: IngressRoutes (Host) + Certificates (dnsNames/commonName) +
+# ConfigMaps que carregam URL pública.
+# ----------------------------------------------------------------------
+patches:
+  # ---- Traefik dashboard ----
+  - path: domain-patches/traefik-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: traefik-dashboard
+      namespace: traefik
+  - path: domain-patches/traefik-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: traefik-dashboard
+      namespace: traefik
+
+  # ---- n8n main ----
+  - path: domain-patches/n8n-main-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: n8n-main
+      namespace: n8n
+  - path: domain-patches/n8n-main-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: n8n-main
+      namespace: n8n
+
+  # ---- n8n webhook ----
+  - path: domain-patches/n8n-webhook-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: n8n-webhook
+      namespace: n8n
+  - path: domain-patches/n8n-webhook-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: n8n-webhook
+      namespace: n8n
+
+  # ---- n8n configmap (URLs públicas) ----
+  - path: domain-patches/n8n-configmap.yaml
+    target:
+      version: v1
+      kind: ConfigMap
+      name: n8n-config
+      namespace: n8n
+
+  # ---- Evolution ----
+  - path: domain-patches/evolution-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: evolution
+      namespace: evolution
+  - path: domain-patches/evolution-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: evolution
+      namespace: evolution
+  - path: domain-patches/evolution-configmap.yaml
+    target:
+      version: v1
+      kind: ConfigMap
+      name: evolution-config
+      namespace: evolution
+
+  # ---- arcobatrip ----
+  - path: domain-patches/arcobatrip-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: arcobatrip-api
+      namespace: arcobatrip
+  - path: domain-patches/arcobatrip-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: arcobatrip-api
+      namespace: arcobatrip
+  - path: domain-patches/arcobatrip-configmap.yaml
+    target:
+      version: v1
+      kind: ConfigMap
+      name: arcobatrip-config
+      namespace: arcobatrip
+
+  # ---- receive-forms ----
+  - path: domain-patches/receive-forms-api-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: receive-forms-api
+      namespace: receive-forms
+  - path: domain-patches/receive-forms-app-ingressroute.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: IngressRoute
+      name: receive-forms-app
+      namespace: receive-forms
+  - path: domain-patches/receive-forms-api-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: receive-forms-api
+      namespace: receive-forms
+  - path: domain-patches/receive-forms-app-certificate.yaml
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: Certificate
+      name: receive-forms-app
+      namespace: receive-forms
+  - path: domain-patches/receive-forms-configmap.yaml
+    target:
+      version: v1
+      kind: ConfigMap
+      name: receive-forms-api-config
+      namespace: receive-forms
+  - path: domain-patches/receive-forms-cors.yaml
+    target:
+      group: traefik.io
+      version: v1alpha1
+      kind: Middleware
+      name: receive-forms-cors
+      namespace: receive-forms
+
+  # ----------------------------------------------------------------------
+  # Ajustes de recursos para caber na VPS 2vCPU/8GB
+  # ----------------------------------------------------------------------
+  - path: resource-patches/traefik-deployment.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: traefik
+      namespace: traefik

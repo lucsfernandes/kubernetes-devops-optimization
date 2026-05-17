@@ -1,0 +1,17 @@
+# Namespace do cert-manager.
+#
+# IMPORTANTE: o cert-manager em si NÃO é instalado por estes manifests.
+# Use o manifest oficial (ver INSTALL.md), porque ele já inclui CRDs,
+# webhooks, RBAC, Deployments etc. Estes arquivos contêm APENAS o
+# namespace (no-op se já existir) e os ClusterIssuers.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+    app.kubernetes.io/managed-by: kustomize
+    # cert-manager precisa do label abaixo para o webhook funcionar
+    # quando enforcement de Pod Security é restrito em outros namespaces.
+    pod-security.kubernetes.io/enforce: privileged

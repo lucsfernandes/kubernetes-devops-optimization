@@ -1,0 +1,36 @@
+# Configuração do Redis 7.
+# - AOF (everysec) para persistência razoável.
+# - maxmemory 256mb com política allkeys-lru (cache+queue do n8n cabem).
+# - requirepass injetado por env var via entrypoint.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: databases
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+data:
+  redis.conf: |
+    # Network
+    bind 0.0.0.0
+    protected-mode yes
+    port 6379
+    tcp-keepalive 60
+    timeout 0
+
+    # Logging
+    loglevel notice
+
+    # Persistence (AOF)
+    appendonly yes
+    appendfsync everysec
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    dir /data
+
+    # Memory
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+
+    # Security: requirepass virá via CONFIG SET no entrypoint (Secret).

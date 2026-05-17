@@ -1,0 +1,16 @@
+# PVC da Evolution API — armazena sessões Baileys / mídias locais.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-data
+  namespace: evolution
+  labels:
+    app.kubernetes.io/name: evolution
+    app.kubernetes.io/part-of: <YOUR-ORGANIZATION-HERE>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-path
